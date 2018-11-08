@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    
+
+
+<form action="/addpost" method='post'>
+    <label> New Blog Post Title:</label>  <p class="error">{{title_error}}</p>
+         <input type="text" id="blogtitle" name='blogtitle' value="{{request.form['blogtitle']}}" />
+     
+    <br><br>
+    
+    <label>New Blog Post: </label><p class="error">{{body_error}}</p>
+        <textarea name="body" rows="20" cols="100" maxlength="5000" wrap="hard" value="{{request.form['body']}}"></textarea>
+        
+   <br>
+    <input style="color: hotpink;" type="submit" value='Add New Blog Post' />
+</form>
+
+    
+{% endblock %}
+

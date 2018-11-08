@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <header>
+                <div>
+                    <a href='/index'>Main Page</a> &ensp;
+                    <a href='/blog'>Blogs and More Blogs</a> &ensp;
+                    <a href='/newpost'>Add New Blog Entry</a>
+            
+                </div>
+        <h1>A Black Woman's Blog</h1>
+        <hr>
+        </header>
+        <style>
+            .error {
+                color: red;
+            }
+           
+            body {background-color:rgb(243, 245, 246);
+           }
+            h1 { font-family: Verdana, Geneva, Tahoma, sans-serif, serif;
+                color:hotpink;
+                text-align: center;
+            }
+            label {
+                font-family: Verdana, Geneva, Tahoma, sans-serif, serif;
+                font-weight: bold;
+            }
+            h4, p {
+                font-family: Verdana, Geneva, Tahoma, sans-serif, serif;
+            }       
+
+        </style>
+    </head>
+<body>
+
+    
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>
