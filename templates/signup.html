@@ -1,37 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Sign Up!</h1>
+<h4>Create An Account</h4>
 
-<hr/>
+<h6>* Required fields</h6>
 
-<p>* Required fields</p>
-
-<style>
-    .error { color: red; display:inline-block;
-    }
-</style>
 <form action="/signup" method="post" >
     <label for="username"> Username* </label>
         <input name="username" type="text" value="{{request.form['username']}}" />
         <p class="error">{{username_error}}</p>
-    <br>
-    
+       
     <label for="password"> Password* </label>
         <input name="password" type="password" value="{{ password }}" />
         <p class="error">{{password_error}}</p>
-   <br>
+  
 
     <label for="verify"> Verify* </label>
         <input name="verify" type="password" value="{{ verify }}" />
         <p class="error">{{verify_error}}</p>
-   <br>
-
-    <label for="email">Email (optional) </label>
-        <input name="email" type="text" value="{{request.form['email'] }}" />
-        <p class="error">{{email_error}}</p>
-    <br>
-
+   
+     <br>
     <input type="submit" value="Sign Up">
 </form>
 {% endblock %}

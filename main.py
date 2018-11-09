@@ -12,7 +12,7 @@ class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     blogtitle = db.Column(db.String(200))
-    body = db.Column(db.Text)
+    body = db.Column(db.Text())
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, blogtitle, body, owner):
@@ -44,12 +44,17 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if username and username.password == password:
+        if user and user.password == password:
             session['username'] = username
             flash("Logged in")
-            return redirect('/')
+            return redirect('/newpost')
         else:
-            flash('User password incorrect, or user does not exist', 'error')
+            flash('User password incorrect', 'error')
+            return redirect('/login')
+
+        if user not in User.query.filter_by(username=username).first():
+            flash('User does not exist', 'error')
+            return redirect('/login')
 
     return render_template('login.html')
 
@@ -60,73 +65,66 @@ def signup():
         password = request.form['password']
         verify = request.form['verify']
 
-        # TODO - validate user's data
+        username_error = ''
+        password_error = ''
+        verify_error = ''
+        
 
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
-            new_user = User(username, password)
-            db.session.add(new_user)
-            db.session.commit()
-            session['username'] = username
-            return redirect('/')
+        if  username == "":
+            username_error = 'Please enter Username'
+            #username = ''
         else:
-            # TODO - user better response messaging
-            return "<h1>Duplicate user</h1>"
-
-    return render_template('signup.html')
-
-def validate_user():
-    username = request.form['username']
-    password = request.form['password']
-    verify = request.form['verify']
-    
-
-    username_error = ''
-    password_error = ''
-    verify_error = ''
-   
-
-    if  username == "":
-        username_error = 'Please enter Username'
-        #username = ''
-    else:
-        if len(username) < 3 or len(username) > 20:
-            username_error = 'Please enter Password with at least 3 characters and 20 or less characters'
-            username = ''
-        
-    if  password == "":
-        password_error = 'Please enter Password'
-        password = ''
-    else:
-        if len(password) < 3 or len(password) > 20:
-            password_error = 'Please enter Password with at least 3 characters and 20 or less characters'
+            if len(username) < 3 or len(username) > 20:
+                username_error = 'Please enter Password with at least 3 characters and 20 or less characters'
+                username = ''
+            
+        if  password == "":
+            password_error = 'Please enter Password'
             password = ''
+        else:
+            if len(password) < 3 or len(password) > 20:
+                password_error = 'Please enter Password with at least 3 characters and 20 or less characters'
+                password = ''
 
-    if  verify == "":
-        verify_error = 'Please verify password'
-        verify = ''
-    else:
-        if verify != password:
-            verify_error = 'Verified password must match password'
+        if  verify == "":
+            verify_error = 'Please verify password'
             verify = ''
+        else:
+            if verify != password:
+                verify_error = 'Verified password must match password'
+                verify = ''
 
-        
+            
+        if not username_error and not password_error and not verify_error:
+            name = username
+            return add_user()
+
+        else: 
+            return render_template('signup.html', username_error=username_error, 
+                password_error=password_error, verify_error=verify_error)
+
+def add_user():
+    existing_user = User.query.filter_by(username=username).first()
+    if not existing_user:
+        new_user = User(username, password)
+        db.session.add(new_user)
+        db.session.commit()
+        session['username'] = username
+        return redirect('/')
+    else:
+        # TODO - user better response messaging
+        return "<h1>Duplicate user</h1>"
+
+    return render_template('/index')
 
 
-    if not username_error and not password_error and not verify_error:
-        name = username
-        return redirect('/index')
-
-    else: 
-        return render_template('signup.html', username_error=username_error, 
-            password_error=password_error, verify_error=verify_error)
 
 
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/index')
 def index():
     return render_template('index.html')
-       
+    
 @app.route('/blog')
 def blog():
     blogs = Blog.query.all()
@@ -138,29 +136,35 @@ def newpost():
 
 @app.route('/addpost', methods=['POST'])
 def addpost():
-    blogtitle = request.form['blogtitle']
-    body = request.form['body']
     
-    title_error = ''
-    body_error = ''
-    
-    if blogtitle == "":
-        title_error = 'Enter blog title'
-   
-    if body == "":
-        body_error = 'Enter blog post'
-    
-    if not title_error and not body_error:
-        new_blog = Blog(blogtitle=blogtitle, body=body)
+    owner = User.query.filter_by(username=session['username']).first()
 
-        db.session.add(new_blog)
-        db.session.commit()
+    if request.method == 'POST':
+        blogtitle = request.form['blogtitle']
+        body = request.form['body']
         
-        return redirect('/blog')
+        title_error = ''
+        body_error = ''
+        
+        if blogtitle == "":
+            title_error = 'Enter blog title'
     
-    else:
-        return render_template('newpost.html', title_error=title_error, 
-        body_error=body_error)
+        if body == "":
+            body_error = 'Enter blog post'
+        
+        if not title_error and not body_error:
+                    
+            new_blog = Blog(blogtitle=blogtitle, body=body, owner=owner)
+
+            db.session.add(new_blog)
+            db.session.commit()
+            
+            
+            return redirect('/blog')
+        
+        else:
+            return render_template('newpost.html', title_error=title_error, 
+            body_error=body_error)
 
   
 
@@ -171,6 +175,13 @@ def single():
     blogid = Blog.query.filter_by(id=blog_id).first()
     
     return render_template('single.html', b=blogid)
+
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/')
+
 
 if __name__ == '__main__':
     app.run()
