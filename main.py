@@ -48,14 +48,15 @@ def login():
             session['username'] = username
             flash("Logged in")
             return redirect('/newpost')
+        
+        elif user != username:
+            flash('User does not exist', 'error')
+            return redirect('/login')
+        
         else:
             flash('User password incorrect', 'error')
             return redirect('/login')
-
-            if user not in User.query.filter_by(username=username).first():
-                flash('User does not exist', 'error')
-                return redirect('/login')
-
+        
     return render_template('login.html')
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -96,25 +97,23 @@ def signup():
 
             
         if not username_error and not password_error and not verify_error:
-            return add_user()
+            existing_user = User.query.filter_by(username=username).first()
+            if not existing_user:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return redirect('/newpost')
+            else:
+                flash('Existing user name. Login as a user or create new account', 'error')
+                return redirect('/')
+                
 
         else: 
             return render_template('signup.html', username_error=username_error, 
                 password_error=password_error, verify_error=verify_error)
 
-def add_user():
-    existing_user = User.query.filter_by(username=username).first()
-    if not existing_user:
-        new_user = User(username, password)
-        db.session.add(new_user)
-        db.session.commit()
-        session['username'] = username
-        return redirect('/')
-    else:
-        # TODO - user better response messaging
-        return "<h1>Duplicate user</h1>"
-
-    return render_template('/index')
+    return render_template('signup.html')
 
 
 
