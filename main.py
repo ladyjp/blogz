@@ -52,9 +52,9 @@ def login():
             flash('User password incorrect', 'error')
             return redirect('/login')
 
-        if user not in User.query.filter_by(username=username).first():
-            flash('User does not exist', 'error')
-            return redirect('/login')
+            if user not in User.query.filter_by(username=username).first():
+                flash('User does not exist', 'error')
+                return redirect('/login')
 
     return render_template('login.html')
 
@@ -96,7 +96,6 @@ def signup():
 
             
         if not username_error and not password_error and not verify_error:
-            name = username
             return add_user()
 
         else: 
