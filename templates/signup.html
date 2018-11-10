@@ -6,18 +6,21 @@
 <h6>* Required fields</h6>
 
 <form action="/signup" method="post" >
-    <label for="username"> Username* </label>
+    <label for="username"> Username* </label> 
         <input name="username" type="text" value="{{request.form['username']}}" />
-        <p class="error">{{username_error}}</p>
+            <span <p class="error">{{username_error}}</p></span>
+        
        
-    <label for="password"> Password* </label>
-        <input name="password" type="password" value="{{ password }}" />
-        <p class="error">{{password_error}}</p>
+    <label for="password"> Password* </label>  
+        <input name="password" type="password" value="{{ password }}" /> 
+        <span p class="error">{{password_error}}</p></span>
+       
   
 
     <label for="verify"> Verify* </label>
-        <input name="verify" type="password" value="{{ verify }}" />
-        <p class="error">{{verify_error}}</p>
+        <input name="verify" type="password" value="{{ verify }}" /> 
+        <span <p class="error">{{verify_error}}</p></span>
+        
    
      <br>
     <input type="submit" value="Sign Up">

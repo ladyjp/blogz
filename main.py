@@ -33,9 +33,10 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup']
+    allowed_routes = ['login', 'signup', 'index']
     if request.endpoint not in allowed_routes and 'username' not in session:
-        return redirect('/login')
+        flash('Login or Signup Required to Post to Blog', 'error')
+        return redirect('/index')
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -75,16 +76,16 @@ def signup():
             username_error = 'Please enter Username'
             #username = ''
         else:
-            if len(username) < 3 or len(username) > 20:
-                username_error = 'Please enter Password with at least 3 characters and 20 or less characters'
+            if len(username) < 3:
+                username_error = 'Please enter Password with at least 3 characters'
                 username = ''
             
         if  password == "":
             password_error = 'Please enter Password'
             password = ''
         else:
-            if len(password) < 3 or len(password) > 20:
-                password_error = 'Please enter Password with at least 3 characters and 20 or less characters'
+            if len(password) < 3:
+                password_error = 'Please enter Password with at least 3 characters'
                 password = ''
 
         if  verify == "":
