@@ -36,7 +36,7 @@ def require_login():
     allowed_routes = ['login', 'signup', 'index']
     if request.endpoint not in allowed_routes and 'username' not in session:
         flash('Login or Signup Required to Post to Blog', 'error')
-        return redirect('/index')
+        return redirect('/login')
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -48,7 +48,7 @@ def login():
         if user and user.password == password:
             session['username'] = username
             flash("Logged in")
-            return redirect('/newpost')
+            return redirect('/home')
         
         elif user != username:
             flash('User does not exist', 'error')
@@ -119,14 +119,36 @@ def signup():
 
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html')
     
+    users = User.query.all()
+    return render_template('index.html', users=users)
+
+  
+#Home app route refers to the page users see after they log in to indicate what they want to do
+@app.route('/home', methods=['POST', 'GET'])
+def home():
+    return render_template('home.html')
+
 @app.route('/blog')
 def blog():
     blogs = Blog.query.all()
+    blog_id = request.args.get('id')
+    user_id = request.args.get('userid')
+
+    if request.method == 'GET' and blog_id:
+        blog_id = int(blog_id)
+        blogs =  Blog.query.filter_by(id={blog_id}).all()
+        return render_template('single.html', blogs=blogs)
+
+    if request.method == 'GET' and user_id:
+        user_id = int(user_id)
+        blogs =  Blog.query.filter_by(owner_id=user_id).all()
+        return render_template('singleuser.html', owner_id)
+
+
     return render_template('blog.html', blogs=blogs)
 
 @app.route('/newpost', methods=['POST', 'GET'])
@@ -165,8 +187,8 @@ def addpost():
             return render_template('newpost.html', title_error=title_error, 
             body_error=body_error)
 
-  
-
+ 
+   
 
 @app.route('/single')
 def single():
