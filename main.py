@@ -132,24 +132,29 @@ def index():
 def home():
     return render_template('home.html')
 
-@app.route('/blog')
+@app.route('/blog', methods=['POST', 'GET'])
 def blog():
     blogs = Blog.query.all()
-    blog_id = request.args.get('id')
-    user_id = request.args.get('userid')
+    
+   
+    if request.method == 'GET':
+        if 'id' in request.args:
+            blog_id = int(request.args.get('id'))
+            blogs = Blog.query.filter_by(id=blog_id).first()
+            return render_template('single.html', blogtitle=blogs.blogtitle, body=blogs.body, 
+                username=blogs.owner.username, user_id=blogs.owner_id)
+        if 'userid' in request.args:
+            user_id = int(request.args.get('userid'))
+            entries = Blog.query.filter_by(owner_id=user_id).all()
+            return render_template('singleuser.html', blogs=entries)
 
-    if request.method == 'GET' and blog_id:
-        blog_id = int(blog_id)
-        blogs =  Blog.query.filter_by(id={blog_id}).all()
-        return render_template('single.html', blogs=blogs)
-
-    if request.method == 'GET' and user_id:
-        user_id = int(user_id)
-        blogs =  Blog.query.filter_by(owner_id=user_id).all()
-        return render_template('singleuser.html', owner_id)
+        return render_template('blog.html', blogs=blogs)
 
 
-    return render_template('blog.html', blogs=blogs)
+@app.route('/single')
+def single():
+    return render_template('single.html')
+
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -187,15 +192,6 @@ def addpost():
             return render_template('newpost.html', title_error=title_error, 
             body_error=body_error)
 
- 
-   
-
-@app.route('/single')
-def single():
-    blog_id = request.args.get('id') 
-    blogid = Blog.query.filter_by(id=blog_id).first()
-    
-    return render_template('single.html', b=blogid)
 
 
 @app.route('/logout')

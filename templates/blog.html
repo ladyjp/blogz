@@ -5,11 +5,12 @@
 <br>
     <ul>
         {% for b in blogs %} 
-        <h4><a href = "/blog?id={{b.id}}">{{b.blogtitle}}</a></h4>
+        <h4><a href = "/blog?id={{b.id}}">{{b.blogtitle}}</a></h4> 
+        <p>written by <a href ="/blog?userid={{b.owner_id}}">{{b.owner.username}}</a></p>
         <p>{{b.body}}</p>
                
-        <p>written by <a href ="/blog?userid={{b.owner_id}}">{{b.owner.username}}</a></p>
-         
+        
+        <hr>
         {% endfor %}
     </ul> 
 
