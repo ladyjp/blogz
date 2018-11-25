@@ -4,19 +4,21 @@
 
 
 <br>
-    <p> This is a blog from a Black Woman's point of view.  <br><br>It chronicles the the joys & sorrows
+    <p style="text-align:center;"> This is a blog from a Black Woman's point of view.  <br><br>It chronicles the the joys & sorrows
         ups & downs, laughs & tears through the words of Black Women in the world. </p>
     
-<br><h4>Blogger List</h4>
+<br>
+    <div style="text-align:center;">
+    <h4>Blogger List</h4>
 
     <ul>
         {% for u in users %}
         
-        <h5><a href ="/singleuser?id={{u.id}}">{{u.username}}</a></h5>
+        <h5><a href ="/blog?userid={{u.id}}">{{u.username}}</a></h5>
 
         {% endfor %}
     </ul> 
-
+    </div>
 
 {% endblock %}
 

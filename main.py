@@ -31,6 +31,7 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+#restricts available pages to login, signup or index
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'signup', 'index']
@@ -38,7 +39,7 @@ def require_login():
         flash('Login or Signup Required to Post to Blog', 'error')
         return redirect('/login')
 
-
+#logs in users to see their page and other user pages
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -48,7 +49,7 @@ def login():
         if user and user.password == password:
             session['username'] = username
             flash("Logged in")
-            return redirect('/home')
+            return redirect('/index')
         
         elif user != username:
             flash('User does not exist', 'error')
@@ -60,6 +61,8 @@ def login():
         
     return render_template('login.html')
 
+
+#new users can create an account (username & password); verifies length of entries and password 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
     if request.method == 'POST':
@@ -71,7 +74,6 @@ def signup():
         password_error = ''
         verify_error = ''
         
-
         if  username == "":
             username_error = 'Please enter Username'
             #username = ''
@@ -118,25 +120,31 @@ def signup():
 
 
 
-
+#displays all user names and links to their page once user has signed up or logged on
 @app.route('/')
-@app.route('/index')
+@app.route('/index', methods=['POST', 'GET'])
 def index():
-    
+    blogs = Blog.query.all()
     users = User.query.all()
-    return render_template('index.html', users=users)
+    if request.method == 'GET':
+        if 'id' in request.args:
+            blog_id = int(request.args.get('id'))
+            blogs = Blog.query.filter_by(id=blog_id).first()
+            return render_template('single.html', blogtitle=blogs.blogtitle, body=blogs.body, 
+                username=blogs.owner.username, user_id=blogs.owner_id)
+        if 'userid' in request.args:
+            user_id = int(request.args.get('userid'))
+            entries = Blog.query.filter_by(owner_id=user_id).all()
+            return render_template('singleuser.html', blogs=entries)
 
-  
-#Home app route refers to the page users see after they log in to indicate what they want to do
-@app.route('/home', methods=['POST', 'GET'])
-def home():
-    return render_template('home.html')
+        return render_template('index.html', users=users)
+
+
 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
     blogs = Blog.query.all()
     
-   
     if request.method == 'GET':
         if 'id' in request.args:
             blog_id = int(request.args.get('id'))
@@ -150,16 +158,12 @@ def blog():
 
         return render_template('blog.html', blogs=blogs)
 
-
-@app.route('/single')
-def single():
-    return render_template('single.html')
-
-
+#renders blank page for entrying new post
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
     return render_template('newpost.html')
 
+#queries owner of blog and verifies if entries were made; displays errors if title or body are not present
 @app.route('/addpost', methods=['POST'])
 def addpost():
     
@@ -193,7 +197,7 @@ def addpost():
             body_error=body_error)
 
 
-
+#logs user out of session
 @app.route('/logout')
 def logout():
     del session['username']
